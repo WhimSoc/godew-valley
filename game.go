@@ -85,6 +85,7 @@ func debugText() []string {
 		fmt.Sprintf("Player Moving: %v", playerMoving),
 		fmt.Sprintf("Player Src %v", rectToString(playerSrc)),
 		fmt.Sprintf("Player Dest %v", rectToString(playerDest)),
+		fmt.Sprintf("Wall %v", rectToString(wall)),
 		fmt.Sprintf("Music Paused: %v", musicPaused),
 		fmt.Sprintf("can move: %v", canmove),
 	}
@@ -208,54 +209,67 @@ func update() {
 
 	playerSrc.X = playerSrc.Width * float32(playerFrame)
 
-	checkrec := playerSrc
-	checkrec.X += playerDest.X
-	checkrec.Y += playerDest.Y
-
 	canmove = true
 
-	if rl.CheckCollisionRecs(checkrec, wall) {
+	//weird beaviour if not original var is used
+	if rl.CheckCollisionRecs(playerDest, wall) {
 		canmove = false
 	}
 
-	if playerMoving {
-		if playerUp {
-			playerDest.Y -= playerSpeed
+	if canmove {
+		if playerMoving {
+			if playerUp {
+				playerDest.Y -= playerSpeed
 
-			if playerSpeed == 2 {
-				playerDir = 9
+				if playerSpeed == 2 {
+					playerDir = 9
+				}
 			}
+			if playerDown {
+				playerDest.Y += playerSpeed
+
+				if playerSpeed == 2 {
+					playerDir = 8
+				}
+			}
+			if playerLeft {
+				playerDest.X -= playerSpeed
+
+				if playerSpeed == 2 {
+					playerDir = 11
+				}
+
+			}
+			if playerRight {
+				playerDest.X += playerSpeed
+
+				if playerSpeed == 2 {
+					playerDir = 10
+				}
+			}
+
+			if frameCount%8 == 1 {
+				playerFrame++
+			}
+
+		} else if frameCount%45 == 1 {
+			playerFrame++
+
+		}
+	} else {
+		//-4 to add "bounce" effect
+		if playerUp {
+			playerDest.Y += 4
 		}
 		if playerDown {
-			playerDest.Y += playerSpeed
-
-			if playerSpeed == 2 {
-				playerDir = 8
-			}
+			playerDest.Y += -4
 		}
 		if playerLeft {
-			playerDest.X -= playerSpeed
-
-			if playerSpeed == 2 {
-				playerDir = 11
-			}
-
+			playerDest.X += 4
 		}
 		if playerRight {
-			playerDest.X += playerSpeed
-
-			if playerSpeed == 2 {
-				playerDir = 10
-			}
+			playerDest.X += -4
 		}
-
-		if frameCount%8 == 1 {
-			playerFrame++
-		}
-
-	} else if frameCount%45 == 1 {
-		playerFrame++
-
 	}
 
 	frameCount++
